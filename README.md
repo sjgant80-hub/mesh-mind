@@ -28,17 +28,18 @@ estate — nothing here reinvents them, the only new law is the collective colla
   never auto-collapsed, never even lit as a spectrum.
 - **THE TWIN** — `renderEvent` / `dream` / `wake` model the collapse as light (Born rule,
   κ-couplers, live phases): the distribution equals the support shares exactly, power is
-  conserved through every dream, and every event is stamped `simulated light`.
+  conserved through every held state, and every event is stamped `simulated light`.
 
 The κ boundary is exact to the bit: an intent covered 309/500 reuses (309/500 IS 0.618,
 the same double); 308/500 does not.
 
-## The honest split
+## Limits, stated plainly
 
-The REAL: everything above, witnessed. The LENS: "mesh-mind", "manifests", "dreams" —
-poetry that aims the engineering, held at κ, never sold as proven. Photonic hardware
-holding real superposition is lab work; this repo ships the exact software twin and says so
-on every event it renders.
+No real photons — the photonic layer is a software twin (exact arithmetic modelling
+interference and Born measurement), stamped `simulated light` on every event it renders;
+photonic hardware is lab engineering, not this repo. No networked nodes — the four demo
+nodes run in one page; shards over a real wire is a next build, not a claim. No learning,
+no minds — deterministic arithmetic plus one seeded sampler, nothing else.
 
 ## Run the gate
 
