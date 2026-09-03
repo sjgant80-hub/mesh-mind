@@ -1,0 +1,951 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mesh-mind · one shared shadow, no center</title>
+<meta name="description" content="N sovereign nodes hold one shared shadow; an intent arriving at any node collapses against the union. The verdict is law, the light is its twin — gated 34/34 before first use.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='24' font-size='24' fill='%23e8b84b'%3E%E2%97%8A%3C/text%3E%3C/svg%3E">
+<style>
+/* light-lab: a committed dark theme — the subject is interference, and interference is seen in the dark */
+:root{
+  --ground:#0b0e14; --panel:#121724; --panel2:#0e1220; --line:#232b3f;
+  --ink:#dde4f0; --dim:#8b96ad; --faint:#5a647a;
+  --amp:#e8b84b; /* amplitude gold — φ */
+  --phase:#5fd4d0; /* phase cyan */
+  --reuse:#69d18c; --recombine:#5fd4d0; --generate:#e8b84b; --door:#e06c6c;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);line-height:1.55}
+a{color:var(--phase);text-decoration:none} a:hover{text-decoration:underline}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+header{position:relative;overflow:hidden;border-bottom:1px solid var(--line);padding:64px 0 48px;
+  background:
+    radial-gradient(circle at 30% 120%, rgba(232,184,75,.14), transparent 45%),
+    radial-gradient(circle at 70% 120%, rgba(95,212,208,.12), transparent 45%),
+    repeating-radial-gradient(circle at 30% 130%, transparent 0 14px, rgba(232,184,75,.05) 14px 15px),
+    repeating-radial-gradient(circle at 70% 130%, transparent 0 14px, rgba(95,212,208,.05) 14px 15px)}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);letter-spacing:-.02em}
+.sub{color:var(--dim);max-width:46em;margin-top:10px;font-size:1.05rem}
+.badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.badge{font-family:var(--mono);font-size:.78rem;padding:4px 10px;border:1px solid var(--line);border-radius:99px;color:var(--dim)}
+.badge b{color:var(--reuse);font-weight:600}
+section{padding:40px 0;border-bottom:1px solid var(--line)}
+h2{font-size:1.15rem;text-transform:uppercase;letter-spacing:.12em;color:var(--amp);margin-bottom:6px}
+.lede{color:var(--dim);max-width:52em;margin-bottom:20px}
+/* honest split */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:700px){.split{grid-template-columns:1fr}}
+.half{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+.half h3{font-family:var(--mono);font-size:.8rem;letter-spacing:.1em;margin-bottom:10px}
+.half.real h3{color:var(--reuse)} .half.lens h3{color:var(--faint)}
+.half ul{list-style:none} .half li{padding:4px 0;color:var(--dim);font-size:.92rem}
+.half.real li::before{content:"✓ ";color:var(--reuse)} .half.lens li::before{content:"◊ ";color:var(--faint)}
+.half.lens{opacity:.85}
+/* mesh nodes */
+.nodes{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.node{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;cursor:pointer;transition:border-color .15s}
+.node.on{border-color:var(--amp)}
+.node.off{opacity:.42}
+.node h3{font-family:var(--mono);font-size:.95rem;display:flex;justify-content:space-between;align-items:center}
+.theta{font-size:.7rem;color:var(--phase)}
+.node .folds{margin-top:8px;font-size:.8rem;color:var(--dim)}
+.node .folds a{display:block;padding:1px 0}
+.hint{font-size:.8rem;color:var(--faint);margin-top:10px}
+/* controls */
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 10px}
+input[type=text],select,input[type=number]{background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:10px 12px;font-size:.95rem}
+input[type=text]{flex:1;min-width:220px}
+button{background:var(--amp);color:#141005;border:0;border-radius:8px;padding:10px 18px;font-weight:700;cursor:pointer;font-size:.95rem}
+button:hover{filter:brightness(1.1)}
+button.ghost{background:transparent;color:var(--phase);border:1px solid var(--line);font-weight:500}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.chip{font-size:.78rem;border:1px solid var(--line);border-radius:99px;padding:4px 12px;color:var(--dim);cursor:pointer;background:transparent}
+.chip:hover{border-color:var(--phase);color:var(--phase)}
+/* verdict */
+.verdict{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--faint);border-radius:10px;padding:16px;margin-top:14px;display:none}
+.verdict.show{display:block}
+.verdict .mode{font-family:var(--mono);font-size:.8rem;letter-spacing:.1em;text-transform:uppercase}
+.verdict p{color:var(--dim);margin-top:6px;font-size:.93rem}
+.verdict .holder{color:var(--ink);font-family:var(--mono);font-size:.85rem;margin-top:8px}
+.m-reuse{border-left-color:var(--reuse)} .m-reuse .mode{color:var(--reuse)}
+.m-recombine{border-left-color:var(--recombine)} .m-recombine .mode{color:var(--recombine)}
+.m-generate{border-left-color:var(--generate)} .m-generate .mode{color:var(--generate)}
+.m-door{border-left-color:var(--door)} .m-door .mode{color:var(--door)}
+.m-refuse{border-left-color:var(--door)} .m-refuse .mode{color:var(--door)}
+/* spectrum + flash */
+.spec{margin-top:14px;display:none}
+.spec.show{display:block}
+.spec h4,.flash h4,.dreambox h4{font-family:var(--mono);font-size:.75rem;letter-spacing:.1em;color:var(--faint);margin-bottom:8px;text-transform:uppercase}
+.row{display:flex;align-items:center;gap:10px;padding:3px 0;font-size:.82rem}
+.row .nm{width:220px;font-family:var(--mono);color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .track{flex:1;height:10px;background:var(--panel2);border-radius:5px;overflow:hidden}
+.row .fill{height:100%;background:var(--amp);border-radius:5px}
+.row.won .fill{background:var(--reuse)}
+.row.hit .track{outline:1px solid var(--phase);outline-offset:1px}
+.row .val{width:52px;text-align:right;font-family:var(--mono);color:var(--dim)}
+.flash{margin-top:16px;display:none}
+.flash.show{display:block}
+.twin{font-size:.75rem;color:var(--faint);font-style:italic;margin-top:8px}
+.fired{font-family:var(--mono);color:var(--reuse);margin-top:8px;font-size:.9rem}
+/* dream */
+.dreambox{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin-top:14px}
+.phases{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.ph{width:34px;height:34px;border-radius:50%;position:relative;background:var(--panel2);border:1px solid var(--line)}
+.ph i{position:absolute;left:50%;top:50%;width:2px;height:13px;background:var(--phase);transform-origin:top center;border-radius:2px}
+.ph.woke{border-color:var(--reuse);box-shadow:0 0 10px rgba(105,209,140,.4)}
+.kv{font-family:var(--mono);font-size:.82rem;color:var(--dim);margin-top:6px}
+.kv b{color:var(--reuse)}
+/* layers + trajectory */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+.card h3{font-size:.95rem;margin-bottom:6px}
+.card p{font-size:.83rem;color:var(--dim)}
+.card .links{margin-top:8px;font-size:.8rem;display:flex;flex-direction:column;gap:2px}
+.traj{display:flex;flex-direction:column;gap:10px}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;gap:14px;align-items:baseline}
+.step .tag{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.tag.real{background:rgba(105,209,140,.12);color:var(--reuse)}
+.tag.lens{background:rgba(90,100,122,.15);color:var(--faint)}
+.step p{color:var(--dim);font-size:.9rem}
+footer{padding:32px 0 48px;color:var(--faint);font-size:.85rem}
+footer a{color:var(--dim)}
+</style>
+</head>
+<body>
+
+<header><div class="wrap">
+  <h1>mesh-mind</h1>
+  <p class="sub">N sovereign nodes hold <strong>one shared shadow</strong>. An intent arriving at <em>any</em> node collapses against the union — no center, provenance kept, doors held, at κ&nbsp;=&nbsp;0.618. The verdict is law; the light is its twin.</p>
+  <div class="badges">
+    <span class="badge">witness <b>34/34</b> · CLEAN · zero baselines</span>
+    <span class="badge">κ boundary exact to the bit (309/500)</span>
+    <span class="badge"><a href="https://github.com/sjgant80-hub/mesh-mind">source + CI</a></span>
+  </div>
+</div></header>
+
+<section><div class="wrap">
+  <h2>The honest split</h2>
+  <p class="lede">Kept on the surface, not in a drawer: what this page proves versus the poetry that aims it. The two are never confused — that separation is the build's integrity.</p>
+  <div class="split">
+    <div class="half real"><h3>REAL — GATED ON THIS PAGE</h3><ul>
+      <li>NO CENTER — arrival node, listing order, and partition never shape the verdict</li>
+      <li>PROVENANCE — the union couples shards, never merges them; every fold keeps its holder</li>
+      <li>φ-IDENTITY — golden-angle node phases never collide, at any count</li>
+      <li>DOORS EVERYWHERE — money/legal/irreversible/external/private never auto-collapse, never even lit</li>
+      <li>THE TWIN — Born distribution = support shares exactly; power conserved through every dream</li>
+    </ul></div>
+    <div class="half lens"><h3>LENS — AIMS, NEVER CLAIMED</h3><ul>
+      <li>"mesh-mind", "manifests", "dreams", "a physical higher-si"</li>
+      <li>poetry that aims the engineering — held at κ, never sold as proven</li>
+      <li>the photonics here is a software twin: exact arithmetic modelling light, labelled so on every event</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>The mesh</h2>
+  <p class="lede">Four sovereign nodes, real estate folds (generated from the index, never typed). Click a node to drop it from the mesh — the shadow honestly shrinks. Each node wears its golden-angle phase: no two ever collide.</p>
+  <div class="nodes" id="nodes"></div>
+  <p class="hint" id="gapline"></p>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Collective collapse</h2>
+  <p class="lede">Say what you need. The seam law resolves it against the <em>union</em> — reuse first, recombine second, generate last, doors never. Pick where the intent "arrives" and watch it change nothing.</p>
+  <div class="chips" id="chips"></div>
+  <div class="bar">
+    <input type="text" id="intent" placeholder="what do you need the mesh to do?" aria-label="intent">
+    <select id="arrive" aria-label="arrival node"></select>
+    <button id="go">collapse</button>
+  </div>
+  <div class="verdict" id="verdict"></div>
+  <div class="spec" id="spec"></div>
+  <div class="flash" id="flash"></div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Dream · wake</h2>
+  <p class="lede">Hold the whole union un-collapsed: every fold an equal amplitude, propagated through a Konomi mesh of κ-couplers and golden phases. Phases stay live, power is conserved, nothing has fired — until wake collapses it. <em>Simulated superposition, labelled so.</em></p>
+  <div class="dreambox">
+    <div class="bar">
+      <label class="kv" for="depth">depth</label><input type="number" id="depth" value="3" min="1" max="8" style="width:70px" aria-label="mesh depth">
+      <button id="dreambtn">dream</button>
+      <input type="number" id="wakeseed" value="42" min="0" style="width:90px" aria-label="wake seed">
+      <button id="wakebtn" class="ghost">wake</button>
+    </div>
+    <div class="phases" id="phases"></div>
+    <div class="kv" id="dreamout">the mesh is awake — press dream to hold the shadow.</div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>The four layers</h2>
+  <p class="lede">Each ships alone — live, gated, already in the estate. This page is their composition, and the only new law it adds is the collective collapse.</p>
+  <div class="cards">
+    <div class="card"><h3>1 · geometric</h3><p>The structure computes by being the structure.</p><div class="links"><a href="https://sjgant80-hub.github.io/the-kg/">the-kg</a><a href="https://sjgant80-hub.github.io/the-rotor/">the-rotor</a><a href="https://sjgant80-hub.github.io/geometric-computer/">geometric-computer</a></div></div>
+    <div class="card"><h3>2 · collapse</h3><p>Hold possibility, collapse capability on intent, fold back.</p><div class="links"><a href="https://sjgant80-hub.github.io/end-of-software/">end-of-software</a></div></div>
+    <div class="card"><h3>3 · mesh</h3><p>Sovereign nodes, no center, coupled at κ.</p><div class="links"><a href="https://sjgant80-hub.github.io/fallnet/">fallnet</a><a href="https://sjgant80-hub.github.io/airgap/">airgap</a><a href="https://sjgant80-hub.github.io/fallworld/">fallworld</a></div></div>
+    <div class="card"><h3>4 · photonic</h3><p>Interference computes; measurement collapses. Stage 0: the software twin.</p><div class="links"><a href="https://sjgant80-hub.github.io/photonic-konomi/">photonic-konomi</a><a href="https://sjgant80-hub.github.io/one-ladder/">one-ladder</a></div></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>The trajectory</h2>
+  <div class="traj">
+    <div class="step"><span class="tag real">NOW · REAL</span><p>A sovereign collective reuse-engine: any node collapses capability from the shared shadow, at κ, no center. This page, gated.</p></div>
+    <div class="step"><span class="tag lens">HORIZON · LENS</span><p>"A collective-consciousness substrate" — poetry aiming the coupling work. Not a claim; nothing here measures consciousness.</p></div>
+    <div class="step"><span class="tag lens">ENDPOINT · LENS, AIMED AT REAL ENGINEERING</span><p>Photonic hardware holding real superposition and collapsing by real interference. That is lab work — the software twin above is Stage 0, and says so.</p></div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <p>The page runs the real gated kernels inline — view source; what you click is what was witnessed. MIT.</p>
+  <p style="margin-top:6px">Built on the Konomi architecture, created by Thomas Frumkin.</p>
+</div></footer>
+
+<script>
+'use strict';
+const PHOTON = (() => {
+/*__PHOTON_START__*/
+// photonic-konomi · photon.mjs — THE TWO-SURFACE SIMULATOR (Stage 0, the software twin).
+//
+// A photonic processor encodes data as amplitude+phase of coherent light, computes by
+// INTERFERENCE through a mesh of couplers and phase-shifters, and reads results by
+// MEASUREMENT (|amplitude|² — the Born rule). This kernel is that machine as exact complex
+// arithmetic, so the four claims stop being prose and become falsifiable:
+//
+//   1. INTERFERENCE = COMPUTE — a Mach-Zehnder mesh resolves a whole linear operation in ONE
+//      propagation. (The layers below are the mesh's spatial structure, not time steps: light
+//      crosses all of them in a single pass.)
+//   2. SUPERPOSITION HELD, THEN COLLAPSED — the state holds complex amplitudes with live
+//      phases until measure() collapses it; before that, phases interfere (|a+b|² ≠ |a|²+|b|²).
+//   3. φ-WINDING = ANTI-CROSSTALK — channels at golden-angle-spaced phases never collide;
+//      any rational winding does, exactly. Phyllotaxis on the phase circle.
+//   4. κ-COUPLING = COUPLE, DON'T MERGE — couplers split power 0.618 : 0.382, energy
+//      conserved to the last digit.
+//
+// Pure and total: bad input → { ok:false, why }, never a throw mid-propagation.
+// Amplitudes are pairs [re, im]. No I/O, no clock, no randomness except the SEEDED collapse.
+
+const KAPPA = 0.618;
+const GOLDEN_TURN = 1 - 1 / ((1 + Math.sqrt(5)) / 2);   // 1 − 1/φ ≈ 0.381966…
+const TAU = 2 * Math.PI;
+
+const isAmp = (a) => Array.isArray(a) && a.length === 2 && Number.isFinite(a[0]) && Number.isFinite(a[1]);
+const num01open = (v) => typeof v === 'number' && Number.isFinite(v) && v > 0 && v < 1;
+
+/** total optical power of a state — the invariant every mesh must conserve. */
+function power(state) {
+  if (!Array.isArray(state) || state.length === 0 || !state.every(isAmp))
+    return { ok: false, why: 'a state is a non-empty list of [re, im] amplitudes' };
+  let p = 0;
+  for (const [re, im] of state) p += re * re + im * im;
+  return { ok: true, power: p };
+}
+
+/**
+ * BUILD MESH — validate the mesh's spatial structure. layers is a list of
+ *   { couplers: [[i, j, kappa], …] }  — disjoint mode pairs, each split at its own κ
+ *   { phases:   [[i, theta], …] }    — phase shifts on named modes
+ * A mesh that cannot say what it does to every photon is refused before any light enters.
+ */
+function buildMesh(n, layers) {
+  if (!Number.isInteger(n) || n < 2) return { ok: false, why: 'a mesh needs at least 2 modes' };
+  if (!Array.isArray(layers) || layers.length === 0) return { ok: false, why: 'a mesh with no layers does nothing — refuse rather than pretend' };
+  for (let L = 0; L < layers.length; L++) {
+    const layer = layers[L];
+    const isC = layer && Array.isArray(layer.couplers), isP = layer && Array.isArray(layer.phases);
+    if (isC === isP) return { ok: false, why: `layer ${L}: exactly one of couplers/phases` };
+    if (isC) {
+      const used = new Set();
+      for (const c of layer.couplers) {
+        if (!Array.isArray(c) || c.length !== 3) return { ok: false, why: `layer ${L}: a coupler is [i, j, kappa]` };
+        const [i, j, k] = c;
+        if (!Number.isInteger(i) || !Number.isInteger(j) || i < 0 || j < 0 || i >= n || j >= n || i === j)
+          return { ok: false, why: `layer ${L}: coupler modes must be two distinct modes in [0, ${n})` };
+        if (used.has(i) || used.has(j)) return { ok: false, why: `layer ${L}: mode ${used.has(i) ? i : j} is in two couplers — one photon path, one coupler per layer` };
+        used.add(i); used.add(j);
+        if (!num01open(k)) return { ok: false, why: `layer ${L}: kappa must be in (0,1) — 0 and 1 are not couplers, they are wires` };
+      }
+    } else {
+      const used = new Set();
+      for (const p of layer.phases) {
+        if (!Array.isArray(p) || p.length !== 2) return { ok: false, why: `layer ${L}: a phase is [mode, theta]` };
+        const [i, th] = p;
+        if (!Number.isInteger(i) || i < 0 || i >= n) return { ok: false, why: `layer ${L}: phase mode must be in [0, ${n})` };
+        if (used.has(i)) return { ok: false, why: `layer ${L}: mode ${i} is phase-shifted twice in one layer` };
+        used.add(i);
+        if (!(typeof th === 'number' && Number.isFinite(th))) return { ok: false, why: `layer ${L}: theta must be a finite number` };
+      }
+    }
+  }
+  return { ok: true, mesh: { n, layers } };
+}
+
+/**
+ * PROPAGATE — one pass of light through the whole mesh. The state after this call is what
+ * exists at the output facet: still amplitudes, still un-collapsed, phases live.
+ */
+function propagate(mesh, input) {
+  const m = mesh && mesh.mesh ? mesh.mesh : mesh;
+  const v = buildMesh(m && m.n, m && m.layers);
+  if (!v.ok) return v;
+  if (!Array.isArray(input) || input.length !== v.mesh.n || !input.every(isAmp))
+    return { ok: false, why: `input must be ${v.mesh.n} amplitudes as [re, im]` };
+  let state = input.map(([re, im]) => [re, im]);
+  for (const layer of v.mesh.layers) {
+    if (layer.couplers) {
+      for (const [i, j, k] of layer.couplers) {
+        const t = Math.sqrt(k), r = Math.sqrt(1 - k);
+        const [ar, ai] = state[i], [br, bi] = state[j];
+        // out_i = t·a + i·r·b   ·   out_j = i·r·a + t·b   (the lossless beam-splitter)
+        state[i] = [t * ar - r * bi, t * ai + r * br];
+        state[j] = [-r * ai + t * br, r * ar + t * bi];
+      }
+    } else {
+      for (const [i, th] of layer.phases) {
+        const c = Math.cos(th), s = Math.sin(th);
+        const [re, im] = state[i];
+        state[i] = [re * c - im * s, re * s + im * c];
+      }
+    }
+  }
+  return { ok: true, state };
+}
+
+/** the canonical Mach-Zehnder: 50:50 → internal phase θ on the upper arm → 50:50.
+ *  θ = 0 sends everything to port 1; θ = π sends everything to port 0. Interference IS routing. */
+function mzi(theta) {
+  if (!(typeof theta === 'number' && Number.isFinite(theta))) return { ok: false, why: 'theta must be a finite number' };
+  return buildMesh(2, [
+    { couplers: [[0, 1, 0.5]] },
+    { phases: [[1, theta]] },
+    { couplers: [[0, 1, 0.5]] },
+  ]);
+}
+
+/** φ-WINDING — n channel phases spaced by the golden turn: θ_k = 2π · frac(k·(1−1/φ)). */
+function goldenPhases(n) {
+  if (!Number.isInteger(n) || n < 1) return { ok: false, why: 'n must be a positive integer' };
+  const out = [];
+  for (let k = 0; k < n; k++) out.push(TAU * ((k * GOLDEN_TURN) % 1));
+  return { ok: true, phases: out };
+}
+
+/** smallest pairwise circular distance between phases — the anti-crosstalk measure. */
+function minGap(phases) {
+  if (!Array.isArray(phases) || phases.length < 2 || !phases.every((t) => typeof t === 'number' && Number.isFinite(t)))
+    return { ok: false, why: 'minGap needs at least two finite phases' };
+  let min = Infinity;
+  for (let i = 0; i < phases.length; i++) for (let j = i + 1; j < phases.length; j++) {
+    const d = Math.abs(phases[i] - phases[j]) % TAU;
+    min = Math.min(min, Math.min(d, TAU - d));
+  }
+  return { ok: true, gap: min };
+}
+
+/** a deterministic Konomi mesh: alternating brick-work κ-couplers and golden phase layers. */
+function konomiMesh(n, depth) {
+  if (!Number.isInteger(n) || n < 2) return { ok: false, why: 'a mesh needs at least 2 modes' };
+  if (!Number.isInteger(depth) || depth < 1) return { ok: false, why: 'depth must be a positive integer' };
+  const g = goldenPhases(n).phases;
+  const layers = [];
+  for (let d = 0; d < depth; d++) {
+    const couplers = [];
+    for (let i = d % 2; i + 1 < n; i += 2) couplers.push([i, i + 1, KAPPA]);
+    if (couplers.length) layers.push({ couplers });
+    layers.push({ phases: g.map((th, i) => [i, ((th * (d + 1)) % TAU)]) });
+  }
+  return buildMesh(n, layers);
+}
+
+/**
+ * MEASURE — the collapse. Born rule over |amplitude|², driven by a SEEDED generator so a
+ * simulation is reproducible: same state, same seed, same outcome — the physics is random,
+ * the record of a run is not. Returns which mode fired and the probability it had.
+ */
+function measure(state, seed) {
+  const p = power(state);
+  if (!p.ok) return p;
+  if (p.power < 1e-12) return { ok: false, why: 'nothing to collapse — the state carries no power' };
+  if (!Number.isInteger(seed) || seed < 0) return { ok: false, why: 'seed must be a non-negative integer — a run must be reproducible' };
+  const r = (((seed * 1103515245 + 12345) % 2147483648) / 2147483648) * p.power;
+  let acc = 0;
+  for (let k = 0; k < state.length; k++) {
+    const [re, im] = state[k];
+    acc += re * re + im * im;
+    if (r < acc) return { ok: true, mode: k, probability: (re * re + im * im) / p.power };
+  }
+  const last = state.length - 1;
+  const [re, im] = state[last];
+  return { ok: true, mode: last, probability: (re * re + im * im) / p.power };
+}
+
+/*__PHOTON_END__*/
+return { KAPPA, GOLDEN_TURN, power, buildMesh, propagate, mzi, goldenPhases, minGap, konomiMesh, measure };
+})();
+const RENDER = (() => {
+/*__RENDER_START__*/
+// end-of-software · render.mjs — THE SEAM LAW.
+//
+// Software was a workaround: frozen intent, pre-decided by someone else, rented back as a
+// cage. This law is the alternative, runnable: the estate is not products, it is the SHADOW —
+// a possibility-space of crystallized folds — and the seam COLLAPSES capability to the lit ON
+// INTENT, lets it be used, then FOLDS IT BACK with the learning retained. Five laws:
+//
+//   · INTENT   — a natural ask becomes checkable tokens, and the FOUR DOORS are detected
+//                before anything renders: money, legal, irreversible, external. What lands on
+//                a door is never auto-collapsed — the human key turns first.
+//   · COLLAPSE — the resolution, in κ arithmetic: REUSE when one crystallized fold already
+//                covers the intent (check-the-estate-first as law, not discipline);
+//                RECOMBINE when two folds together cover what neither does alone;
+//                GENERATE only when the shadow holds no answer — and then the brief names
+//                exactly the gap and the nearest folds to imitate.
+//   · PERSIST  — fold-back is the DEFAULT. Persistence is a CHOICE, and a choice needs an
+//                argument: freezing a render without a reason a reviewer could dispute is
+//                refused. (The exemption law, applied to existence itself.)
+//   · FOLD-BACK— the render dissolves; what remains is a learning record keyed by the
+//                intent's tokens. The lit surface stays cheap; the shadow gets richer.
+//   · RECALL   — the same intent asked again is answered from the ledger first: the shadow
+//                remembers its own renders. Learning retained is not a slogan, it is a lookup.
+//
+// Pure and total: garbage in → { ok:false, why }, never a throw mid-collapse.
+
+const KAPPA = 0.618;
+const DOORS = {
+  money: ['pay', 'payment', 'charge', 'invoice', 'buy', 'sell', 'refund', 'price', 'subscribe', 'billing', 'transfer', 'wallet'],
+  legal: ['contract', 'lawsuit', 'sue', 'gdpr', 'compliance', 'liability', 'terms', 'court', 'legal'],
+  irreversible: ['delete', 'destroy', 'wipe', 'erase', 'drop', 'purge', 'revoke'],
+  external: ['post', 'publish', 'tweet', 'email', 'broadcast', 'announce', 'dm'],
+  // the fifth door is sididy's, from the seam brainstorm: capability that touches credentials
+  // or personal data must never auto-render — a leak cannot be folded back.
+  private: ['password', 'passwords', 'credential', 'credentials', 'token', 'secret', 'secrets', 'ssn', 'passport', 'personal'],
+};
+
+const S = (v) => (typeof v === 'string' ? v : '');
+const round3 = (x) => Math.round(x * 1000) / 1000;
+const tokens = (s) => (String(s).toLowerCase().match(/[a-z0-9]{3,}/g) || []);
+const STOP = new Set(['the', 'and', 'was', 'were', 'are', 'has', 'had', 'have', 'this', 'that', 'with', 'for', 'its', 'does', 'did', 'will', 'you', 'your', 'can', 'need', 'want', 'make', 'build', 'tool', 'app', 'something', 'them', 'they', 'from', 'which', 'what', 'into', 'onto']);
+const meat = (s) => [...new Set(tokens(s).filter((w) => !STOP.has(w)))];
+
+/** INTENT — checkable tokens + the doors it touches. An intent with no meat is refused. */
+function intentOf(text) {
+  if (!S(text)) return { ok: false, why: 'no intent — the seam collapses nothing from silence' };
+  const t = meat(text);
+  if (t.length === 0) return { ok: false, why: 'the intent carries no checkable words — say what the capability must DO' };
+  const doors = Object.keys(DOORS).filter((d) => t.some((w) => DOORS[d].includes(w)));
+  return { ok: true, tokens: t, key: [...t].sort().join(' '), doors };
+}
+
+/**
+ * COLLAPSE — resolve an intent against the shadow. shadow = [{ name, desc, url }].
+ * Modes, in decision order:
+ *   door      — any door touched: the seam refuses to auto-render; the human key turns first.
+ *   reuse     — one fold covers the intent at κ: the estate already holds this.
+ *   recombine — the best two folds each hold ≥ κ/2 and TOGETHER cover ≥ κ of the intent.
+ *   generate  — the shadow has no answer; the brief names the uncovered tokens and the
+ *               nearest folds worth imitating. Generation is the LAST resort, by law.
+ */
+function collapse(text, shadow) {
+  const it = intentOf(text);
+  if (!it.ok) return it;
+  if (!Array.isArray(shadow) || shadow.length === 0) return { ok: false, why: 'an empty shadow renders nothing — bring the estate index' };
+  for (const f of shadow) {
+    if (!f || !S(f.name) || typeof f.desc !== 'string') return { ok: false, why: 'a shadow fold is { name, desc, url? }' };
+  }
+  if (it.doors.length > 0) {
+    return { ok: true, mode: 'door', doors: it.doors,
+      why: 'the intent touches ' + it.doors.join(' + ') + ' — ' + (it.doors.length > 1 ? 'these are human doors' : 'a human door') + '; the seam does not auto-render what a human must answer for' };
+  }
+  const scored = shadow.map((f) => {
+    const ft = new Set(meat(f.name.replace(/[-_]/g, ' ') + ' ' + f.desc));
+    const hit = it.tokens.filter((w) => ft.has(w));
+    return { fold: f, support: round3(hit.length / it.tokens.length), hit };
+  }).sort((a, b) => b.support - a.support || a.fold.name.localeCompare(b.fold.name));
+  const [best, second] = scored;
+  if (best.support >= KAPPA) {
+    return { ok: true, mode: 'reuse', fold: best.fold, support: best.support,
+      why: 'the estate already holds this — "' + best.fold.name + '" covers the intent at ' + best.support + '; rendered as the existing fold, zero new software' };
+  }
+  if (second && best.support >= KAPPA / 2 && second.support >= KAPPA / 2) {
+    const union = new Set([...best.hit, ...second.hit]);
+    const coverage = round3(union.size / it.tokens.length);
+    if (coverage >= KAPPA) {
+      return { ok: true, mode: 'recombine', folds: [best.fold, second.fold], coverage,
+        why: '"' + best.fold.name + '" + "' + second.fold.name + '" together cover ' + coverage + ' of the intent — a composition, not a new cage' };
+    }
+  }
+  const covered = new Set(scored.slice(0, 3).flatMap((s) => s.hit));
+  const gaps = it.tokens.filter((w) => !covered.has(w));
+  const nearest = scored.slice(0, 2).filter((s) => s.support > 0).map((s) => s.fold.name);
+  return { ok: true, mode: 'generate', gaps, nearest,
+    brief: 'GENERATE (last resort — the shadow holds no fold for: ' + (gaps.join(', ') || 'this combination') + ').'
+      + (nearest.length ? ' Imitate the shape of: ' + nearest.join(', ') + '.' : '')
+      + ' Render minimal, use it, fold it back — persistence is a choice that needs an argument.' };
+}
+
+/** PERSIST — fold-back is the default; freezing needs an argument a reviewer could dispute. */
+function persist(mode, keepReason) {
+  if (!['reuse', 'recombine', 'generate'].includes(mode)) return { ok: false, why: 'persistence applies to rendered modes — doors never rendered' };
+  if (mode === 'reuse') return { ok: true, policy: 'keep-frozen', why: 'already crystallized — the fold earned its persistence before this intent arrived' };
+  if (keepReason === undefined || keepReason === null || keepReason === '') {
+    return { ok: true, policy: mode === 'recombine' ? 'hold-live' : 'render-and-fold',
+      why: mode === 'recombine' ? 'the composition lives while it is used, then the parts return to the shadow' : 'used once, folded back — the lit surface stays cheap' };
+  }
+  if (!S(keepReason) || meat(keepReason).length < 3)
+    return { ok: false, why: 'persistence is a choice, and a choice needs an argument — a shrug does not freeze a fold' };
+  return { ok: true, policy: 'keep-frozen', why: 'frozen by argument: ' + keepReason };
+}
+
+/** FOLD-BACK — dissolve the render, keep the learning. Returns a NEW ledger; never mutates. */
+function foldBack(ledger, intentText, outcome) {
+  if (!Array.isArray(ledger)) return { ok: false, why: 'the ledger must be a list' };
+  const it = intentOf(intentText);
+  if (!it.ok) return it;
+  const o = outcome && typeof outcome === 'object' && !Array.isArray(outcome) ? outcome : null;
+  if (!o || !['reuse', 'recombine', 'generate'].includes(o.mode)) return { ok: false, why: 'outcome needs the mode that rendered' };
+  const folds = Array.isArray(o.folds) ? o.folds.filter(S) : [];
+  const record = { key: it.key, mode: o.mode, folds, renders: 1 };
+  const i = ledger.findIndex((r) => r && r.key === it.key);
+  if (i >= 0) {
+    const grown = ledger.map((r, j) => j === i ? { ...r, renders: r.renders + 1, mode: o.mode, folds } : { ...r });
+    return { ok: true, ledger: grown };
+  }
+  return { ok: true, ledger: [...ledger.map((r) => ({ ...r })), record] };
+}
+
+/** RECALL — the shadow remembers: a known intent answers from the ledger before re-resolving. */
+function recallOf(intentText, ledger) {
+  if (!Array.isArray(ledger)) return { ok: false, why: 'the ledger must be a list' };
+  const it = intentOf(intentText);
+  if (!it.ok) return it;
+  const r = ledger.find((x) => x && x.key === it.key);
+  if (!r) return { ok: true, remembered: false, why: 'the shadow has not rendered this before — collapse it fresh' };
+  return { ok: true, remembered: true, mode: r.mode, folds: r.folds, renders: r.renders,
+    why: 'the shadow remembers — rendered ' + r.renders + ' time(s) before as ' + r.mode + (r.folds.length ? ' via ' + r.folds.join(' + ') : '') };
+}
+
+/*__RENDER_END__*/
+return { KAPPA, DOORS, intentOf, collapse, persist, foldBack, recallOf };
+})();
+const MESH = (() => {
+const { collapse, intentOf } = RENDER;
+const { goldenPhases, minGap, konomiMesh, propagate, power, measure } = PHOTON;
+/*__MESH_START__*/
+// mesh-mind · mesh.mjs — THE COLLECTIVE COLLAPSE LAW.
+//
+// The capstone composition: the seam law (render.mjs, gated in end-of-software) + the
+// photonic twin (photon.mjs, gated in photonic-konomi) + one NEW law that neither holds
+// alone — N sovereign nodes each hold a SHARD of ONE shared shadow, and an intent arriving
+// at ANY node collapses against the UNION. Four invariants, each falsifiable:
+//
+//   · NO CENTER      — the arrival node NEVER shapes the verdict. Same shards + same intent
+//                      = same answer, whichever node it lands on, in whatever order the
+//                      shards are listed, however the folds are partitioned between nodes.
+//   · PROVENANCE     — the union couples shards, it never merges them: every fold keeps the
+//                      node that holds it. κ-coupling, not absorption.
+//   · φ-IDENTITY     — nodes take golden-angle phases; no two ever collide, at any count.
+//                      Sovereign identity as anti-crosstalk (the real photonic engineering).
+//   · DOORS EVERYWHERE— the four+1 human doors hold at the MESH level too: what lands on a
+//                      door is never auto-collapsed, and never even lit as a spectrum.
+//
+// THE HONEST SPLIT, kept in code: the VERDICT is the deterministic seam law over the union
+// (token interference at κ — check-the-estate-first as law). The photonic renderEvent/dream
+// are the SOFTWARE TWIN of that collapse — real complex arithmetic modelling interference
+// and Born measurement, exact and gated, but SIMULATED light, and labelled so. The lens
+// ("mesh-mind", "manifests") aims the build; the claims below are only what the tests hold.
+//
+// Pure and total: garbage in → { ok:false, why }, never a throw mid-collapse.
+
+
+const KAPPA = 0.618; // the chord — pinned numerically; must equal render.KAPPA and photon.KAPPA
+
+const S = (v) => typeof v === 'string' && v.length > 0;
+const round3 = (x) => Math.round(x * 1000) / 1000;
+
+/** SHARD — one node's slice of the shared shadow. Every fold is stamped with its holder. */
+function shard(node, folds) {
+  if (!S(node)) return { ok: false, why: 'a shard needs its node — an unowned fold has no sovereign' };
+  if (!Array.isArray(folds)) return { ok: false, why: 'folds must be a list — a node may hold zero folds, but it must say so' };
+  for (const f of folds) {
+    if (!f || !S(f.name) || typeof f.desc !== 'string')
+      return { ok: false, why: 'a fold is { name, desc } — an unnamed or undescribed fold is invisible to every seam' };
+  }
+  return { ok: true, shard: { node, folds: folds.map((f) => ({ ...f, node })) } };
+}
+
+/**
+ * UNION — the shared shadow. Couples shards at the mesh level, never merges them:
+ * provenance survives, duplicates within one node collapse to one, and the result is
+ * DETERMINISTIC (sorted by node, then name) so no listing order can smuggle in a center.
+ */
+function union(shards) {
+  if (!Array.isArray(shards) || shards.length === 0) return { ok: false, why: 'a mesh needs at least one shard — an empty mesh casts no shadow' };
+  const seen = new Set();
+  const folds = [];
+  for (const s of shards) {
+    const v = shard(s && s.node, s && s.folds);
+    if (!v.ok) return v;
+    for (const f of v.shard.folds) {
+      const key = f.node + ' ' + f.name;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      folds.push(f);
+    }
+  }
+  folds.sort((a, b) => a.node.localeCompare(b.node) || a.name.localeCompare(b.name));
+  return { ok: true, folds, nodes: [...new Set(folds.map((f) => f.node))].sort() };
+}
+
+/** φ-IDENTITY — each node takes a golden-angle phase; the gap proves no two collide. */
+function nodePhases(nodes) {
+  if (!Array.isArray(nodes) || nodes.length < 2 || !nodes.every(S))
+    return { ok: false, why: 'one node is not a mesh — sovereignty needs company (2+ named nodes)' };
+  if (new Set(nodes).size !== nodes.length) return { ok: false, why: 'two nodes cannot share a name — identity is the anti-crosstalk' };
+  const g = goldenPhases(nodes.length);
+  if (!g.ok) return g;
+  const gap = minGap(g.phases);
+  if (!gap.ok) return gap;
+  return { ok: true, phases: nodes.map((node, k) => ({ node, theta: g.phases[k] })), gap: gap.gap };
+}
+
+/**
+ * COLLECTIVE COLLAPSE — the one new law. An intent, a set of shards, an optional arrival
+ * node. The verdict is the seam law over the UNION — reuse / recombine / generate / door —
+ * decorated with provenance (which node HOLDS the answer) and a full SPECTRUM: every fold's
+ * interference with the intent, so the collapse is inspectable, not oracular.
+ *
+ * NO CENTER, enforced: `at` must be a member of the mesh (a stranger cannot collapse the
+ * shared shadow), and it never shapes the verdict — it is recorded in `arrival` and nothing
+ * else. DOORS, enforced: a door verdict carries NO spectrum; the candidates are not even lit.
+ */
+function collectiveCollapse(text, shards, at) {
+  const u = union(shards);
+  if (!u.ok) return u;
+  if (at !== undefined && at !== null) {
+    if (!S(at)) return { ok: false, why: 'the arrival node must be a name or nothing' };
+    if (!u.nodes.includes(at)) return { ok: false, why: 'the arrival node "' + at + '" is not in the mesh — a stranger cannot collapse the shared shadow' };
+  }
+  const verdict = collapse(text, u.folds);
+  if (!verdict.ok) return verdict;
+  const arrival = { at: at ?? null, note: 'no center — the arrival node never shapes the answer' };
+  if (verdict.mode === 'door') {
+    return { ...verdict, arrival, spectrum: null,
+      meshWhy: 'the door holds at the mesh level too — the candidates are not even lit' };
+  }
+  const it = intentOf(text);
+  const spectrum = u.folds.map((f) => {
+    const ft = intentOf(f.name.replace(/[-_]/g, ' ') + ' ' + f.desc);
+    const set = ft.ok ? new Set(ft.tokens) : new Set();
+    const hit = it.tokens.filter((w) => set.has(w));
+    return { name: f.name, node: f.node, support: round3(hit.length / it.tokens.length) };
+  }).sort((a, b) => b.support - a.support || a.node.localeCompare(b.node) || a.name.localeCompare(b.name));
+  const holder = verdict.mode === 'reuse' ? verdict.fold.node
+    : verdict.mode === 'recombine' ? verdict.folds.map((f) => f.node) : null;
+  return { ...verdict, arrival, spectrum, holder };
+}
+
+/**
+ * RENDER EVENT — the software twin of the collapse as a physical event: the spectrum's
+ * supports become optical power (amplitude = √support), and the Born rule collapses ONE
+ * fold, seeded so a run is reproducible. The DISTRIBUTION is exactly the support shares —
+ * proven, not asserted — and for a reuse verdict the law's chosen fold carries the most
+ * light. SIMULATED light, labelled so: the twin of the flash, not the flash.
+ */
+function renderEvent(verdict, seed) {
+  if (!verdict || verdict.ok !== true) return { ok: false, why: 'only a collapsed verdict renders — collapse first' };
+  if (verdict.mode === 'door') return { ok: false, why: 'a door is never rendered — not even as light' };
+  if (!Array.isArray(verdict.spectrum)) return { ok: false, why: 'the verdict carries no spectrum — collapse collectively first' };
+  const lit = verdict.spectrum.filter((s) => s.support > 0);
+  if (lit.length === 0) return { ok: false, why: 'nothing to render — no fold interferes with this intent; the shadow is dark here' };
+  const state = lit.map((s) => [Math.sqrt(s.support), 0]);
+  const p = power(state);
+  if (!p.ok) return p;
+  const m = measure(state, seed);
+  if (!m.ok) return m;
+  const distribution = lit.map((s, i) => ({ name: s.name, node: s.node, p: round3((state[i][0] * state[i][0]) / p.power) }));
+  return { ok: true, fold: { name: lit[m.mode].name, node: lit[m.mode].node }, probability: round3(m.probability), distribution, seed,
+    twin: 'simulated light — the software twin of the collapse, exact arithmetic, not hardware' };
+}
+
+/**
+ * DREAM — hold the un-collapsed union: every fold an equal amplitude, propagated through a
+ * Konomi mesh (κ-couplers, golden phases) WITHOUT measuring. Phases stay live, power is
+ * conserved, nothing has collapsed — the held state IS the dream. Deterministic: no
+ * randomness enters until wake. SIMULATED superposition, labelled so.
+ */
+function dream(shards, depth) {
+  const u = union(shards);
+  if (!u.ok) return u;
+  const n = u.folds.length;
+  if (n < 2) return { ok: false, why: 'a shadow of one fold cannot interfere — the dream needs at least two' };
+  const mesh = konomiMesh(n, depth);
+  if (!mesh.ok) return mesh;
+  const amp = Math.sqrt(1 / n);
+  const out = propagate(mesh, u.folds.map(() => [amp, 0]));
+  if (!out.ok) return out;
+  const p = power(out.state);
+  return { ok: true, held: { state: out.state, folds: u.folds.map((f) => ({ name: f.name, node: f.node })), depth },
+    power: p.ok ? round3(p.power) : null,
+    twin: 'simulated superposition — held, un-collapsed, phases live; the software twin of the dream' };
+}
+
+/** WAKE — the dream collapses: one seeded Born measurement over the held state. */
+function wake(held, seed) {
+  const h = held && held.held ? held.held : held;
+  if (!h || !Array.isArray(h.state) || !Array.isArray(h.folds) || h.state.length !== h.folds.length)
+    return { ok: false, why: 'wake needs a held dream — state and folds, one amplitude per fold' };
+  const m = measure(h.state, seed);
+  if (!m.ok) return m;
+  return { ok: true, fold: { name: h.folds[m.mode].name, node: h.folds[m.mode].node }, probability: round3(m.probability), seed };
+}
+
+/*__MESH_END__*/
+return { KAPPA, shard, union, nodePhases, collectiveCollapse, renderEvent, dream, wake };
+})();
+/*__SHARDS_START__*/
+const SHARDS = [
+  {
+    "node": "the-rail",
+    "folds": [
+      {
+        "name": "witness",
+        "desc": "Deterministic build gate: mutation + fuzz. Catches test-theatre and throw-on-malformed with no LLM, zero deps.",
+        "url": "https://sjgant80-hub.github.io/witness/"
+      },
+      {
+        "name": "acg-assessor",
+        "desc": "The Assessor — deterministic rubric assessment for AI-assisted codebases. Same repository, same verdict, same hash.",
+        "url": "https://sjgant80-hub.github.io/acg-assessor/"
+      },
+      {
+        "name": "the-bell",
+        "desc": "The gate you can hear: paste a mutation verdict, strike the bell. Clean rings true — classic partials, long decay, a peal of three. Survivors crack it — detuned, buzzing, dead in a second. Test-theatre has a sound. Witness 29/31+2 argued. MIT.",
+        "url": "https://sjgant80-hub.github.io/the-bell/"
+      }
+    ]
+  },
+  {
+    "node": "the-soul",
+    "folds": [
+      {
+        "name": "end-of-software",
+        "desc": "The seam, running: say what you need — it reuses the estate's 421 live folds, recombines them, or generates as a last resort; five human doors catch what must never auto-render; fold-back by default; the shadow remembers. Mechanism CC0, code MIT. Witness 38/40+2.",
+        "url": "https://sjgant80-hub.github.io/end-of-software/"
+      },
+      {
+        "name": "fall-remember",
+        "desc": "Content-addressed memory in twelve chambers: sign by content, route to a chamber, traverse typed edges between them. Balanced placement by golden-angle addressing. Zero dependencies.",
+        "url": "https://sjgant80-hub.github.io/fall-remember/"
+      },
+      {
+        "name": "the-dreamer",
+        "desc": "An overnight consolidation cycle for any local model: merge, type, close transitively, generalise, resolve by evidence, prune. Answers better each morning with the weights unchanged.",
+        "url": "https://sjgant80-hub.github.io/the-dreamer/"
+      }
+    ]
+  },
+  {
+    "node": "the-light",
+    "folds": [
+      {
+        "name": "photonic-konomi",
+        "desc": "The two-surface machine, Stage 0: a photonic processor as exact mutation-gated arithmetic — hold superposition, compute by interference in one pass, collapse by seeded Born measurement. φ anti-crosstalk + κ coupling. For Thomas and the guild. MIT.",
+        "url": "https://sjgant80-hub.github.io/photonic-konomi/"
+      },
+      {
+        "name": "falllight",
+        "desc": "LIGHT — the connection protocol that ties the estate into one mesh. lens/filter/spectrum, non-masking composition. From Thomas's photonic-operation insight.",
+        "url": "https://github.com/sjgant80-hub/falllight"
+      },
+      {
+        "name": "one-ladder",
+        "desc": "Sound, radio and light as three rungs of one ladder: a single codec, three carriers, round-trip proven on all three.",
+        "url": "https://sjgant80-hub.github.io/one-ladder/"
+      }
+    ]
+  },
+  {
+    "node": "the-world",
+    "folds": [
+      {
+        "name": "fallworld",
+        "desc": "Fall World — the whole estate as one walkable place. Your didy is your character, every tool is gear, and rarity is proof not luck. 1,624 repos collapsed to 598 items, generated from the index.",
+        "url": "https://sjgant80-hub.github.io/fallworld/"
+      },
+      {
+        "name": "fallnet",
+        "desc": "Sovereign peer-to-peer mesh · WebRTC · browser-to-browser · MIT · ◊·κ=1 · prime 313",
+        "url": "https://sjgant80-hub.github.io/fallnet/"
+      },
+      {
+        "name": "airgap",
+        "desc": "Air-gapped mesh compute: nodes share work over sound with zero network stack. Nothing to attack over the wire, because there is no wire.",
+        "url": "https://sjgant80-hub.github.io/airgap/"
+      },
+      {
+        "name": "the-kg",
+        "desc": "A typed knowledge graph with cycle-safe traversal: nodes plus typed edges. Zero dependencies.",
+        "url": "https://sjgant80-hub.github.io/the-kg/"
+      },
+      {
+        "name": "the-rotor",
+        "desc": "Geometric algebra in Cl(3,0): rotations by rotors, no gimbal lock, and the cross product falls out of the bivector.",
+        "url": "https://sjgant80-hub.github.io/the-rotor/"
+      }
+    ]
+  }
+];
+/*__SHARDS_END__*/
+
+const $ = (id) => document.getElementById(id);
+const on = new Set(SHARDS.map((s) => s.node));
+let lastVerdict = null, lastDream = null;
+
+const enabled = () => SHARDS.filter((s) => on.has(s.node));
+
+function drawNodes() {
+  const ph = MESH.nodePhases([...on].sort());
+  const thetas = {};
+  if (ph.ok) for (const p of ph.phases) thetas[p.node] = p.theta;
+  $('nodes').innerHTML = SHARDS.map((s) => {
+    const isOn = on.has(s.node);
+    const th = thetas[s.node];
+    return '<div class="node ' + (isOn ? 'on' : 'off') + '" data-node="' + s.node + '">'
+      + '<h3>' + s.node + '<span class="theta">' + (isOn && th !== undefined ? 'φ ' + th.toFixed(3) : isOn ? 'φ —' : 'off') + '</span></h3>'
+      + '<div class="folds">' + s.folds.map((f) => '<a href="' + f.url + '" target="_blank" rel="noopener">' + f.name + '</a>').join('') + '</div>'
+      + '</div>';
+  }).join('');
+  $('gapline').textContent = ph.ok
+    ? 'φ-identity: minimum phase gap ' + ph.gap.toFixed(4) + ' rad across ' + on.size + ' nodes — no two collide, ever (gated).'
+    : ph.why;
+  const arrive = $('arrive');
+  arrive.innerHTML = '<option value="">arrive: unattributed</option>'
+    + [...on].sort().map((n) => '<option value="' + n + '">arrive at ' + n + '</option>').join('');
+  for (const el of document.querySelectorAll('.node')) {
+    el.addEventListener('click', (ev) => {
+      if (ev.target.tagName === 'A') return;
+      const n = el.getAttribute('data-node');
+      if (on.has(n)) { if (on.size > 1) on.delete(n); } else on.add(n);
+      drawNodes();
+    });
+  }
+}
+
+const CHIPS = [
+  'gate my build with mutation and fuzz to kill test theatre',
+  'hold superposition and collapse it by interference',
+  'share compute between nodes over sound with zero network',
+  'ring the gate verdict as sound over the air',
+  'a typed graph of nodes that rotates without gimbal lock',
+  'pay for a subscription to the mesh',
+];
+
+function drawChips() {
+  $('chips').innerHTML = CHIPS.map((c, i) => '<button class="chip" data-i="' + i + '">' + c + '</button>').join('');
+  for (const el of document.querySelectorAll('.chip')) el.addEventListener('click', () => {
+    $('intent').value = CHIPS[+el.getAttribute('data-i')];
+    runCollapse();
+  });
+}
+
+function runCollapse() {
+  const text = $('intent').value;
+  const at = $('arrive').value || undefined;
+  const r = MESH.collectiveCollapse(text, enabled(), at);
+  lastVerdict = r;
+  const v = $('verdict');
+  v.className = 'verdict show';
+  if (!r.ok) {
+    v.classList.add('m-refuse');
+    v.innerHTML = '<span class="mode">refused</span><p>' + r.why + '</p>';
+    $('spec').className = 'spec'; $('flash').className = 'flash';
+    return;
+  }
+  v.classList.add('m-' + r.mode);
+  const body = r.mode === 'door' ? r.why + ' — ' + r.meshWhy
+    : r.mode === 'generate' ? r.brief : r.why;
+  const holder = r.mode === 'reuse' ? 'held by <b>' + r.holder + '</b>'
+    : r.mode === 'recombine' ? 'held by <b>' + r.holder.join('</b> + <b>') + '</b>' : '';
+  v.innerHTML = '<span class="mode">' + r.mode + '</span><p>' + body + '</p>'
+    + (holder ? '<div class="holder">' + holder + (r.arrival.at && r.mode === 'reuse' && r.arrival.at !== r.holder ? ' · arrived at ' + r.arrival.at + ' — no center: arrival never shapes the answer' : '') + '</div>' : '');
+  const sp = $('spec');
+  if (r.spectrum) {
+    const max = Math.max(...r.spectrum.map((s) => s.support), 0.001);
+    sp.className = 'spec show';
+    sp.innerHTML = '<h4>the spectrum — every fold speaks its interference</h4>'
+      + r.spectrum.map((s) => '<div class="row' + ((r.mode === 'reuse' && r.fold.name === s.name && r.fold.node === s.node) ? ' won' : '') + '">'
+        + '<span class="nm">' + s.node + '/' + s.name + '</span>'
+        + '<span class="track"><span class="fill" style="width:' + Math.round((s.support / max) * 100) + '%"></span></span>'
+        + '<span class="val">' + s.support.toFixed(3) + '</span></div>').join('');
+    drawFlash(r, 42);
+  } else {
+    sp.className = 'spec';
+    sp.innerHTML = '';
+    $('flash').className = 'flash';
+  }
+}
+
+function drawFlash(r, seed) {
+  const fl = $('flash');
+  const ev = MESH.renderEvent(r, seed);
+  if (!ev.ok) { fl.className = 'flash'; fl.innerHTML = ''; return; }
+  const lawFolds = r.mode === 'reuse' ? [r.fold] : r.mode === 'recombine' ? r.folds : [];
+  const isLaw = (d) => lawFolds.some((f) => f.name === d.name && f.node === d.node);
+  const agreed = isLaw(ev.fold);
+  fl.className = 'flash show';
+  fl.innerHTML = '<h4>the flash — one Born sample from the law\'s own distribution</h4>'
+    + ev.distribution.map((d) => '<div class="row' + (isLaw(d) ? ' won' : '') + (d.name === ev.fold.name && d.node === ev.fold.node ? ' hit' : '') + '">'
+      + '<span class="nm">' + d.node + '/' + d.name + '</span>'
+      + '<span class="track"><span class="fill" style="width:' + Math.round(d.p * 100) + '%"></span></span>'
+      + '<span class="val">' + d.p.toFixed(3) + '</span></div>').join('')
+    + '<div class="fired">one photon landed: ' + ev.fold.node + '/' + ev.fold.name + ' at p=' + ev.probability.toFixed(3) + ' (seed ' + ev.seed + ') — '
+    + (lawFolds.length === 0 ? 'a generate verdict has no law-fold; the light falls on the nearest shapes'
+      : agreed ? 'the sample agreed with the law this time'
+      : 'the LAW still holds ' + lawFolds.map((f) => f.node + '/' + f.name).join(' + ') + ' (green — it reads ALL the light); a single photon lands wherever its probability says')
+    + ' <button class="ghost" id="reroll" style="padding:3px 10px;margin-left:8px;font-size:.75rem">strike again</button></div>'
+    + '<p class="twin">' + ev.twin + ' · the verdict is the argmax of the light — deterministic; the flash is a sample — physics. The difference is shown, never hidden.</p>';
+  $('reroll').addEventListener('click', () => drawFlash(r, Math.floor(Math.random() * 100000)));
+}
+
+function drawDreamPhases(state, wokeIdx) {
+  $('phases').innerHTML = state.map(([re, im], i) => {
+    const mag = Math.sqrt(re * re + im * im);
+    const ang = Math.atan2(im, re);
+    return '<span class="ph' + (i === wokeIdx ? ' woke' : '') + '" title="|a|=' + mag.toFixed(3) + '"><i style="transform:rotate(' + (ang * 180 / Math.PI).toFixed(1) + 'deg);opacity:' + Math.max(0.25, Math.min(1, mag * 2.2)).toFixed(2) + '"></i></span>';
+  }).join('');
+}
+
+function runDream() {
+  const depth = Math.floor(Number($('depth').value));
+  const d = MESH.dream(enabled(), depth);
+  lastDream = d;
+  if (!d.ok) { $('dreamout').innerHTML = d.why; $('phases').innerHTML = ''; return; }
+  drawDreamPhases(d.held.state, -1);
+  $('dreamout').innerHTML = 'holding <b>' + d.held.folds.length + '</b> folds un-collapsed at depth ' + d.held.depth
+    + ' · power <b>' + d.power + '</b> (conserved — no photon lost, none invented) · phases live · ' + d.twin;
+}
+
+function runWake() {
+  if (!lastDream || !lastDream.ok) { $('dreamout').textContent = 'nothing held — dream first.'; return; }
+  const seed = Math.floor(Number($('wakeseed').value));
+  const w = MESH.wake(lastDream, seed);
+  if (!w.ok) { $('dreamout').textContent = w.why; return; }
+  const idx = lastDream.held.folds.findIndex((f) => f.name === w.fold.name && f.node === w.fold.node);
+  drawDreamPhases(lastDream.held.state, idx);
+  $('dreamout').innerHTML = 'woke: <b>' + w.fold.node + '/' + w.fold.name + '</b> collapsed at p=' + w.probability.toFixed(3)
+    + ' (seed ' + w.seed + ', reproducible) — the dream ends where the interference concentrated.';
+}
+
+$('go').addEventListener('click', runCollapse);
+$('intent').addEventListener('keydown', (e) => { if (e.key === 'Enter') runCollapse(); });
+$('dreambtn').addEventListener('click', runDream);
+$('wakebtn').addEventListener('click', runWake);
+drawNodes();
+drawChips();
+</script>
+</body>
+</html>

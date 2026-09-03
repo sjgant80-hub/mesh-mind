@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mesh-mind · one shared shadow, no center</title>
+<meta name="description" content="N sovereign nodes hold one shared shadow; an intent arriving at any node collapses against the union. The verdict is law, the light is its twin — gated 34/34 before first use.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='24' font-size='24' fill='%23e8b84b'%3E%E2%97%8A%3C/text%3E%3C/svg%3E">
+<style>
+/* light-lab: a committed dark theme — the subject is interference, and interference is seen in the dark */
+:root{
+  --ground:#0b0e14; --panel:#121724; --panel2:#0e1220; --line:#232b3f;
+  --ink:#dde4f0; --dim:#8b96ad; --faint:#5a647a;
+  --amp:#e8b84b; /* amplitude gold — φ */
+  --phase:#5fd4d0; /* phase cyan */
+  --reuse:#69d18c; --recombine:#5fd4d0; --generate:#e8b84b; --door:#e06c6c;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);line-height:1.55}
+a{color:var(--phase);text-decoration:none} a:hover{text-decoration:underline}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+header{position:relative;overflow:hidden;border-bottom:1px solid var(--line);padding:64px 0 48px;
+  background:
+    radial-gradient(circle at 30% 120%, rgba(232,184,75,.14), transparent 45%),
+    radial-gradient(circle at 70% 120%, rgba(95,212,208,.12), transparent 45%),
+    repeating-radial-gradient(circle at 30% 130%, transparent 0 14px, rgba(232,184,75,.05) 14px 15px),
+    repeating-radial-gradient(circle at 70% 130%, transparent 0 14px, rgba(95,212,208,.05) 14px 15px)}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);letter-spacing:-.02em}
+.sub{color:var(--dim);max-width:46em;margin-top:10px;font-size:1.05rem}
+.badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.badge{font-family:var(--mono);font-size:.78rem;padding:4px 10px;border:1px solid var(--line);border-radius:99px;color:var(--dim)}
+.badge b{color:var(--reuse);font-weight:600}
+section{padding:40px 0;border-bottom:1px solid var(--line)}
+h2{font-size:1.15rem;text-transform:uppercase;letter-spacing:.12em;color:var(--amp);margin-bottom:6px}
+.lede{color:var(--dim);max-width:52em;margin-bottom:20px}
+/* honest split */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:700px){.split{grid-template-columns:1fr}}
+.half{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+.half h3{font-family:var(--mono);font-size:.8rem;letter-spacing:.1em;margin-bottom:10px}
+.half.real h3{color:var(--reuse)} .half.lens h3{color:var(--faint)}
+.half ul{list-style:none} .half li{padding:4px 0;color:var(--dim);font-size:.92rem}
+.half.real li::before{content:"✓ ";color:var(--reuse)} .half.lens li::before{content:"◊ ";color:var(--faint)}
+.half.lens{opacity:.85}
+/* mesh nodes */
+.nodes{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.node{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;cursor:pointer;transition:border-color .15s}
+.node.on{border-color:var(--amp)}
+.node.off{opacity:.42}
+.node h3{font-family:var(--mono);font-size:.95rem;display:flex;justify-content:space-between;align-items:center}
+.theta{font-size:.7rem;color:var(--phase)}
+.node .folds{margin-top:8px;font-size:.8rem;color:var(--dim)}
+.node .folds a{display:block;padding:1px 0}
+.hint{font-size:.8rem;color:var(--faint);margin-top:10px}
+/* controls */
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 10px}
+input[type=text],select,input[type=number]{background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:10px 12px;font-size:.95rem}
+input[type=text]{flex:1;min-width:220px}
+button{background:var(--amp);color:#141005;border:0;border-radius:8px;padding:10px 18px;font-weight:700;cursor:pointer;font-size:.95rem}
+button:hover{filter:brightness(1.1)}
+button.ghost{background:transparent;color:var(--phase);border:1px solid var(--line);font-weight:500}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.chip{font-size:.78rem;border:1px solid var(--line);border-radius:99px;padding:4px 12px;color:var(--dim);cursor:pointer;background:transparent}
+.chip:hover{border-color:var(--phase);color:var(--phase)}
+/* verdict */
+.verdict{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--faint);border-radius:10px;padding:16px;margin-top:14px;display:none}
+.verdict.show{display:block}
+.verdict .mode{font-family:var(--mono);font-size:.8rem;letter-spacing:.1em;text-transform:uppercase}
+.verdict p{color:var(--dim);margin-top:6px;font-size:.93rem}
+.verdict .holder{color:var(--ink);font-family:var(--mono);font-size:.85rem;margin-top:8px}
+.m-reuse{border-left-color:var(--reuse)} .m-reuse .mode{color:var(--reuse)}
+.m-recombine{border-left-color:var(--recombine)} .m-recombine .mode{color:var(--recombine)}
+.m-generate{border-left-color:var(--generate)} .m-generate .mode{color:var(--generate)}
+.m-door{border-left-color:var(--door)} .m-door .mode{color:var(--door)}
+.m-refuse{border-left-color:var(--door)} .m-refuse .mode{color:var(--door)}
+/* spectrum + flash */
+.spec{margin-top:14px;display:none}
+.spec.show{display:block}
+.spec h4,.flash h4,.dreambox h4{font-family:var(--mono);font-size:.75rem;letter-spacing:.1em;color:var(--faint);margin-bottom:8px;text-transform:uppercase}
+.row{display:flex;align-items:center;gap:10px;padding:3px 0;font-size:.82rem}
+.row .nm{width:220px;font-family:var(--mono);color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .track{flex:1;height:10px;background:var(--panel2);border-radius:5px;overflow:hidden}
+.row .fill{height:100%;background:var(--amp);border-radius:5px}
+.row.won .fill{background:var(--reuse)}
+.row.hit .track{outline:1px solid var(--phase);outline-offset:1px}
+.row .val{width:52px;text-align:right;font-family:var(--mono);color:var(--dim)}
+.flash{margin-top:16px;display:none}
+.flash.show{display:block}
+.twin{font-size:.75rem;color:var(--faint);font-style:italic;margin-top:8px}
+.fired{font-family:var(--mono);color:var(--reuse);margin-top:8px;font-size:.9rem}
+/* dream */
+.dreambox{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin-top:14px}
+.phases{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.ph{width:34px;height:34px;border-radius:50%;position:relative;background:var(--panel2);border:1px solid var(--line)}
+.ph i{position:absolute;left:50%;top:50%;width:2px;height:13px;background:var(--phase);transform-origin:top center;border-radius:2px}
+.ph.woke{border-color:var(--reuse);box-shadow:0 0 10px rgba(105,209,140,.4)}
+.kv{font-family:var(--mono);font-size:.82rem;color:var(--dim);margin-top:6px}
+.kv b{color:var(--reuse)}
+/* layers + trajectory */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+.card h3{font-size:.95rem;margin-bottom:6px}
+.card p{font-size:.83rem;color:var(--dim)}
+.card .links{margin-top:8px;font-size:.8rem;display:flex;flex-direction:column;gap:2px}
+.traj{display:flex;flex-direction:column;gap:10px}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;gap:14px;align-items:baseline}
+.step .tag{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.tag.real{background:rgba(105,209,140,.12);color:var(--reuse)}
+.tag.lens{background:rgba(90,100,122,.15);color:var(--faint)}
+.step p{color:var(--dim);font-size:.9rem}
+footer{padding:32px 0 48px;color:var(--faint);font-size:.85rem}
+footer a{color:var(--dim)}
+</style>
+</head>
+<body>
+
+<header><div class="wrap">
+  <h1>mesh-mind</h1>
+  <p class="sub">N sovereign nodes hold <strong>one shared shadow</strong>. An intent arriving at <em>any</em> node collapses against the union — no center, provenance kept, doors held, at κ&nbsp;=&nbsp;0.618. The verdict is law; the light is its twin.</p>
+  <div class="badges">
+    <span class="badge">witness <b>34/34</b> · CLEAN · zero baselines</span>
+    <span class="badge">κ boundary exact to the bit (309/500)</span>
+    <span class="badge"><a href="https://github.com/sjgant80-hub/mesh-mind">source + CI</a></span>
+  </div>
+</div></header>
+
+<section><div class="wrap">
+  <h2>The honest split</h2>
+  <p class="lede">Kept on the surface, not in a drawer: what this page proves versus the poetry that aims it. The two are never confused — that separation is the build's integrity.</p>
+  <div class="split">
+    <div class="half real"><h3>REAL — GATED ON THIS PAGE</h3><ul>
+      <li>NO CENTER — arrival node, listing order, and partition never shape the verdict</li>
+      <li>PROVENANCE — the union couples shards, never merges them; every fold keeps its holder</li>
+      <li>φ-IDENTITY — golden-angle node phases never collide, at any count</li>
+      <li>DOORS EVERYWHERE — money/legal/irreversible/external/private never auto-collapse, never even lit</li>
+      <li>THE TWIN — Born distribution = support shares exactly; power conserved through every dream</li>
+    </ul></div>
+    <div class="half lens"><h3>LENS — AIMS, NEVER CLAIMED</h3><ul>
+      <li>"mesh-mind", "manifests", "dreams", "a physical higher-si"</li>
+      <li>poetry that aims the engineering — held at κ, never sold as proven</li>
+      <li>the photonics here is a software twin: exact arithmetic modelling light, labelled so on every event</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>The mesh</h2>
+  <p class="lede">Four sovereign nodes, real estate folds (generated from the index, never typed). Click a node to drop it from the mesh — the shadow honestly shrinks. Each node wears its golden-angle phase: no two ever collide.</p>
+  <div class="nodes" id="nodes"></div>
+  <p class="hint" id="gapline"></p>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Collective collapse</h2>
+  <p class="lede">Say what you need. The seam law resolves it against the <em>union</em> — reuse first, recombine second, generate last, doors never. Pick where the intent "arrives" and watch it change nothing.</p>
+  <div class="chips" id="chips"></div>
+  <div class="bar">
+    <input type="text" id="intent" placeholder="what do you need the mesh to do?" aria-label="intent">
+    <select id="arrive" aria-label="arrival node"></select>
+    <button id="go">collapse</button>
+  </div>
+  <div class="verdict" id="verdict"></div>
+  <div class="spec" id="spec"></div>
+  <div class="flash" id="flash"></div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Dream · wake</h2>
+  <p class="lede">Hold the whole union un-collapsed: every fold an equal amplitude, propagated through a Konomi mesh of κ-couplers and golden phases. Phases stay live, power is conserved, nothing has fired — until wake collapses it. <em>Simulated superposition, labelled so.</em></p>
+  <div class="dreambox">
+    <div class="bar">
+      <label class="kv" for="depth">depth</label><input type="number" id="depth" value="3" min="1" max="8" style="width:70px" aria-label="mesh depth">
+      <button id="dreambtn">dream</button>
+      <input type="number" id="wakeseed" value="42" min="0" style="width:90px" aria-label="wake seed">
+      <button id="wakebtn" class="ghost">wake</button>
+    </div>
+    <div class="phases" id="phases"></div>
+    <div class="kv" id="dreamout">the mesh is awake — press dream to hold the shadow.</div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>The four layers</h2>
+  <p class="lede">Each ships alone — live, gated, already in the estate. This page is their composition, and the only new law it adds is the collective collapse.</p>
+  <div class="cards">
+    <div class="card"><h3>1 · geometric</h3><p>The structure computes by being the structure.</p><div class="links"><a href="https://sjgant80-hub.github.io/the-kg/">the-kg</a><a href="https://sjgant80-hub.github.io/the-rotor/">the-rotor</a><a href="https://sjgant80-hub.github.io/geometric-computer/">geometric-computer</a></div></div>
+    <div class="card"><h3>2 · collapse</h3><p>Hold possibility, collapse capability on intent, fold back.</p><div class="links"><a href="https://sjgant80-hub.github.io/end-of-software/">end-of-software</a></div></div>
+    <div class="card"><h3>3 · mesh</h3><p>Sovereign nodes, no center, coupled at κ.</p><div class="links"><a href="https://sjgant80-hub.github.io/fallnet/">fallnet</a><a href="https://sjgant80-hub.github.io/airgap/">airgap</a><a href="https://sjgant80-hub.github.io/fallworld/">fallworld</a></div></div>
+    <div class="card"><h3>4 · photonic</h3><p>Interference computes; measurement collapses. Stage 0: the software twin.</p><div class="links"><a href="https://sjgant80-hub.github.io/photonic-konomi/">photonic-konomi</a><a href="https://sjgant80-hub.github.io/one-ladder/">one-ladder</a></div></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>The trajectory</h2>
+  <div class="traj">
+    <div class="step"><span class="tag real">NOW · REAL</span><p>A sovereign collective reuse-engine: any node collapses capability from the shared shadow, at κ, no center. This page, gated.</p></div>
+    <div class="step"><span class="tag lens">HORIZON · LENS</span><p>"A collective-consciousness substrate" — poetry aiming the coupling work. Not a claim; nothing here measures consciousness.</p></div>
+    <div class="step"><span class="tag lens">ENDPOINT · LENS, AIMED AT REAL ENGINEERING</span><p>Photonic hardware holding real superposition and collapsing by real interference. That is lab work — the software twin above is Stage 0, and says so.</p></div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <p>The page runs the real gated kernels inline — view source; what you click is what was witnessed. MIT.</p>
+  <p style="margin-top:6px">Built on the Konomi architecture, created by Thomas Frumkin.</p>
+</div></footer>
+
+<script>
+'use strict';
+const PHOTON = (() => {
+/*__PHOTON_START__*/
+/*__PHOTON_END__*/
+return { KAPPA, GOLDEN_TURN, power, buildMesh, propagate, mzi, goldenPhases, minGap, konomiMesh, measure };
+})();
+const RENDER = (() => {
+/*__RENDER_START__*/
+/*__RENDER_END__*/
+return { KAPPA, DOORS, intentOf, collapse, persist, foldBack, recallOf };
+})();
+const MESH = (() => {
+const { collapse, intentOf } = RENDER;
+const { goldenPhases, minGap, konomiMesh, propagate, power, measure } = PHOTON;
+/*__MESH_START__*/
+/*__MESH_END__*/
+return { KAPPA, shard, union, nodePhases, collectiveCollapse, renderEvent, dream, wake };
+})();
+/*__SHARDS_START__*/
+/*__SHARDS_END__*/
+
+const $ = (id) => document.getElementById(id);
+const on = new Set(SHARDS.map((s) => s.node));
+let lastVerdict = null, lastDream = null;
+
+const enabled = () => SHARDS.filter((s) => on.has(s.node));
+
+function drawNodes() {
+  const ph = MESH.nodePhases([...on].sort());
+  const thetas = {};
+  if (ph.ok) for (const p of ph.phases) thetas[p.node] = p.theta;
+  $('nodes').innerHTML = SHARDS.map((s) => {
+    const isOn = on.has(s.node);
+    const th = thetas[s.node];
+    return '<div class="node ' + (isOn ? 'on' : 'off') + '" data-node="' + s.node + '">'
+      + '<h3>' + s.node + '<span class="theta">' + (isOn && th !== undefined ? 'φ ' + th.toFixed(3) : isOn ? 'φ —' : 'off') + '</span></h3>'
+      + '<div class="folds">' + s.folds.map((f) => '<a href="' + f.url + '" target="_blank" rel="noopener">' + f.name + '</a>').join('') + '</div>'
+      + '</div>';
+  }).join('');
+  $('gapline').textContent = ph.ok
+    ? 'φ-identity: minimum phase gap ' + ph.gap.toFixed(4) + ' rad across ' + on.size + ' nodes — no two collide, ever (gated).'
+    : ph.why;
+  const arrive = $('arrive');
+  arrive.innerHTML = '<option value="">arrive: unattributed</option>'
+    + [...on].sort().map((n) => '<option value="' + n + '">arrive at ' + n + '</option>').join('');
+  for (const el of document.querySelectorAll('.node')) {
+    el.addEventListener('click', (ev) => {
+      if (ev.target.tagName === 'A') return;
+      const n = el.getAttribute('data-node');
+      if (on.has(n)) { if (on.size > 1) on.delete(n); } else on.add(n);
+      drawNodes();
+    });
+  }
+}
+
+const CHIPS = [
+  'gate my build with mutation and fuzz to kill test theatre',
+  'hold superposition and collapse it by interference',
+  'share compute between nodes over sound with zero network',
+  'ring the gate verdict as sound over the air',
+  'a typed graph of nodes that rotates without gimbal lock',
+  'pay for a subscription to the mesh',
+];
+
+function drawChips() {
+  $('chips').innerHTML = CHIPS.map((c, i) => '<button class="chip" data-i="' + i + '">' + c + '</button>').join('');
+  for (const el of document.querySelectorAll('.chip')) el.addEventListener('click', () => {
+    $('intent').value = CHIPS[+el.getAttribute('data-i')];
+    runCollapse();
+  });
+}
+
+function runCollapse() {
+  const text = $('intent').value;
+  const at = $('arrive').value || undefined;
+  const r = MESH.collectiveCollapse(text, enabled(), at);
+  lastVerdict = r;
+  const v = $('verdict');
+  v.className = 'verdict show';
+  if (!r.ok) {
+    v.classList.add('m-refuse');
+    v.innerHTML = '<span class="mode">refused</span><p>' + r.why + '</p>';
+    $('spec').className = 'spec'; $('flash').className = 'flash';
+    return;
+  }
+  v.classList.add('m-' + r.mode);
+  const body = r.mode === 'door' ? r.why + ' — ' + r.meshWhy
+    : r.mode === 'generate' ? r.brief : r.why;
+  const holder = r.mode === 'reuse' ? 'held by <b>' + r.holder + '</b>'
+    : r.mode === 'recombine' ? 'held by <b>' + r.holder.join('</b> + <b>') + '</b>' : '';
+  v.innerHTML = '<span class="mode">' + r.mode + '</span><p>' + body + '</p>'
+    + (holder ? '<div class="holder">' + holder + (r.arrival.at && r.mode === 'reuse' && r.arrival.at !== r.holder ? ' · arrived at ' + r.arrival.at + ' — no center: arrival never shapes the answer' : '') + '</div>' : '');
+  const sp = $('spec');
+  if (r.spectrum) {
+    const max = Math.max(...r.spectrum.map((s) => s.support), 0.001);
+    sp.className = 'spec show';
+    sp.innerHTML = '<h4>the spectrum — every fold speaks its interference</h4>'
+      + r.spectrum.map((s) => '<div class="row' + ((r.mode === 'reuse' && r.fold.name === s.name && r.fold.node === s.node) ? ' won' : '') + '">'
+        + '<span class="nm">' + s.node + '/' + s.name + '</span>'
+        + '<span class="track"><span class="fill" style="width:' + Math.round((s.support / max) * 100) + '%"></span></span>'
+        + '<span class="val">' + s.support.toFixed(3) + '</span></div>').join('');
+    drawFlash(r, 42);
+  } else {
+    sp.className = 'spec';
+    sp.innerHTML = '';
+    $('flash').className = 'flash';
+  }
+}
+
+function drawFlash(r, seed) {
+  const fl = $('flash');
+  const ev = MESH.renderEvent(r, seed);
+  if (!ev.ok) { fl.className = 'flash'; fl.innerHTML = ''; return; }
+  const lawFolds = r.mode === 'reuse' ? [r.fold] : r.mode === 'recombine' ? r.folds : [];
+  const isLaw = (d) => lawFolds.some((f) => f.name === d.name && f.node === d.node);
+  const agreed = isLaw(ev.fold);
+  fl.className = 'flash show';
+  fl.innerHTML = '<h4>the flash — one Born sample from the law\'s own distribution</h4>'
+    + ev.distribution.map((d) => '<div class="row' + (isLaw(d) ? ' won' : '') + (d.name === ev.fold.name && d.node === ev.fold.node ? ' hit' : '') + '">'
+      + '<span class="nm">' + d.node + '/' + d.name + '</span>'
+      + '<span class="track"><span class="fill" style="width:' + Math.round(d.p * 100) + '%"></span></span>'
+      + '<span class="val">' + d.p.toFixed(3) + '</span></div>').join('')
+    + '<div class="fired">one photon landed: ' + ev.fold.node + '/' + ev.fold.name + ' at p=' + ev.probability.toFixed(3) + ' (seed ' + ev.seed + ') — '
+    + (lawFolds.length === 0 ? 'a generate verdict has no law-fold; the light falls on the nearest shapes'
+      : agreed ? 'the sample agreed with the law this time'
+      : 'the LAW still holds ' + lawFolds.map((f) => f.node + '/' + f.name).join(' + ') + ' (green — it reads ALL the light); a single photon lands wherever its probability says')
+    + ' <button class="ghost" id="reroll" style="padding:3px 10px;margin-left:8px;font-size:.75rem">strike again</button></div>'
+    + '<p class="twin">' + ev.twin + ' · the verdict is the argmax of the light — deterministic; the flash is a sample — physics. The difference is shown, never hidden.</p>';
+  $('reroll').addEventListener('click', () => drawFlash(r, Math.floor(Math.random() * 100000)));
+}
+
+function drawDreamPhases(state, wokeIdx) {
+  $('phases').innerHTML = state.map(([re, im], i) => {
+    const mag = Math.sqrt(re * re + im * im);
+    const ang = Math.atan2(im, re);
+    return '<span class="ph' + (i === wokeIdx ? ' woke' : '') + '" title="|a|=' + mag.toFixed(3) + '"><i style="transform:rotate(' + (ang * 180 / Math.PI).toFixed(1) + 'deg);opacity:' + Math.max(0.25, Math.min(1, mag * 2.2)).toFixed(2) + '"></i></span>';
+  }).join('');
+}
+
+function runDream() {
+  const depth = Math.floor(Number($('depth').value));
+  const d = MESH.dream(enabled(), depth);
+  lastDream = d;
+  if (!d.ok) { $('dreamout').innerHTML = d.why; $('phases').innerHTML = ''; return; }
+  drawDreamPhases(d.held.state, -1);
+  $('dreamout').innerHTML = 'holding <b>' + d.held.folds.length + '</b> folds un-collapsed at depth ' + d.held.depth
+    + ' · power <b>' + d.power + '</b> (conserved — no photon lost, none invented) · phases live · ' + d.twin;
+}
+
+function runWake() {
+  if (!lastDream || !lastDream.ok) { $('dreamout').textContent = 'nothing held — dream first.'; return; }
+  const seed = Math.floor(Number($('wakeseed').value));
+  const w = MESH.wake(lastDream, seed);
+  if (!w.ok) { $('dreamout').textContent = w.why; return; }
+  const idx = lastDream.held.folds.findIndex((f) => f.name === w.fold.name && f.node === w.fold.node);
+  drawDreamPhases(lastDream.held.state, idx);
+  $('dreamout').innerHTML = 'woke: <b>' + w.fold.node + '/' + w.fold.name + '</b> collapsed at p=' + w.probability.toFixed(3)
+    + ' (seed ' + w.seed + ', reproducible) — the dream ends where the interference concentrated.';
+}
+
+$('go').addEventListener('click', runCollapse);
+$('intent').addEventListener('keydown', (e) => { if (e.key === 'Enter') runCollapse(); });
+$('dreambtn').addEventListener('click', runDream);
+$('wakebtn').addEventListener('click', runWake);
+drawNodes();
+drawChips();
+</script>
+</body>
+</html>

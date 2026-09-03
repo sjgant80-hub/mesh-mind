@@ -1,0 +1,92 @@
+[
+  {
+    "node": "the-rail",
+    "folds": [
+      {
+        "name": "witness",
+        "desc": "Deterministic build gate: mutation + fuzz. Catches test-theatre and throw-on-malformed with no LLM, zero deps.",
+        "url": "https://sjgant80-hub.github.io/witness/"
+      },
+      {
+        "name": "acg-assessor",
+        "desc": "The Assessor — deterministic rubric assessment for AI-assisted codebases. Same repository, same verdict, same hash.",
+        "url": "https://sjgant80-hub.github.io/acg-assessor/"
+      },
+      {
+        "name": "the-bell",
+        "desc": "The gate you can hear: paste a mutation verdict, strike the bell. Clean rings true — classic partials, long decay, a peal of three. Survivors crack it — detuned, buzzing, dead in a second. Test-theatre has a sound. Witness 29/31+2 argued. MIT.",
+        "url": "https://sjgant80-hub.github.io/the-bell/"
+      }
+    ]
+  },
+  {
+    "node": "the-soul",
+    "folds": [
+      {
+        "name": "end-of-software",
+        "desc": "The seam, running: say what you need — it reuses the estate's 421 live folds, recombines them, or generates as a last resort; five human doors catch what must never auto-render; fold-back by default; the shadow remembers. Mechanism CC0, code MIT. Witness 38/40+2.",
+        "url": "https://sjgant80-hub.github.io/end-of-software/"
+      },
+      {
+        "name": "fall-remember",
+        "desc": "Content-addressed memory in twelve chambers: sign by content, route to a chamber, traverse typed edges between them. Balanced placement by golden-angle addressing. Zero dependencies.",
+        "url": "https://sjgant80-hub.github.io/fall-remember/"
+      },
+      {
+        "name": "the-dreamer",
+        "desc": "An overnight consolidation cycle for any local model: merge, type, close transitively, generalise, resolve by evidence, prune. Answers better each morning with the weights unchanged.",
+        "url": "https://sjgant80-hub.github.io/the-dreamer/"
+      }
+    ]
+  },
+  {
+    "node": "the-light",
+    "folds": [
+      {
+        "name": "photonic-konomi",
+        "desc": "The two-surface machine, Stage 0: a photonic processor as exact mutation-gated arithmetic — hold superposition, compute by interference in one pass, collapse by seeded Born measurement. φ anti-crosstalk + κ coupling. For Thomas and the guild. MIT.",
+        "url": "https://sjgant80-hub.github.io/photonic-konomi/"
+      },
+      {
+        "name": "falllight",
+        "desc": "LIGHT — the connection protocol that ties the estate into one mesh. lens/filter/spectrum, non-masking composition. From Thomas's photonic-operation insight.",
+        "url": "https://github.com/sjgant80-hub/falllight"
+      },
+      {
+        "name": "one-ladder",
+        "desc": "Sound, radio and light as three rungs of one ladder: a single codec, three carriers, round-trip proven on all three.",
+        "url": "https://sjgant80-hub.github.io/one-ladder/"
+      }
+    ]
+  },
+  {
+    "node": "the-world",
+    "folds": [
+      {
+        "name": "fallworld",
+        "desc": "Fall World — the whole estate as one walkable place. Your didy is your character, every tool is gear, and rarity is proof not luck. 1,624 repos collapsed to 598 items, generated from the index.",
+        "url": "https://sjgant80-hub.github.io/fallworld/"
+      },
+      {
+        "name": "fallnet",
+        "desc": "Sovereign peer-to-peer mesh · WebRTC · browser-to-browser · MIT · ◊·κ=1 · prime 313",
+        "url": "https://sjgant80-hub.github.io/fallnet/"
+      },
+      {
+        "name": "airgap",
+        "desc": "Air-gapped mesh compute: nodes share work over sound with zero network stack. Nothing to attack over the wire, because there is no wire.",
+        "url": "https://sjgant80-hub.github.io/airgap/"
+      },
+      {
+        "name": "the-kg",
+        "desc": "A typed knowledge graph with cycle-safe traversal: nodes plus typed edges. Zero dependencies.",
+        "url": "https://sjgant80-hub.github.io/the-kg/"
+      },
+      {
+        "name": "the-rotor",
+        "desc": "Geometric algebra in Cl(3,0): rotations by rotors, no gimbal lock, and the cross product falls out of the bivector.",
+        "url": "https://sjgant80-hub.github.io/the-rotor/"
+      }
+    ]
+  }
+]
