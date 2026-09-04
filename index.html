@@ -78,7 +78,7 @@ button.ghost{background:transparent;color:var(--phase);border:1px solid var(--li
 /* spectrum + flash */
 .spec{margin-top:14px;display:none}
 .spec.show{display:block}
-.spec h4,.flash h4,.dreambox h4{font-family:var(--mono);font-size:.75rem;letter-spacing:.1em;color:var(--faint);margin-bottom:8px;text-transform:uppercase}
+.spec h4,.flash h4,.holdbox h4{font-family:var(--mono);font-size:.75rem;letter-spacing:.1em;color:var(--faint);margin-bottom:8px;text-transform:uppercase}
 .row{display:flex;align-items:center;gap:10px;padding:3px 0;font-size:.82rem}
 .row .nm{width:220px;font-family:var(--mono);color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .row .track{flex:1;height:10px;background:var(--panel2);border-radius:5px;overflow:hidden}
@@ -90,8 +90,8 @@ button.ghost{background:transparent;color:var(--phase);border:1px solid var(--li
 .flash.show{display:block}
 .twin{font-size:.75rem;color:var(--faint);font-style:italic;margin-top:8px}
 .fired{font-family:var(--mono);color:var(--reuse);margin-top:8px;font-size:.9rem}
-/* dream */
-.dreambox{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin-top:14px}
+/* hold-measure */
+.holdbox{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin-top:14px}
 .phases{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
 .ph{width:34px;height:34px;border-radius:50%;position:relative;background:var(--panel2);border:1px solid var(--line)}
 .ph i{position:absolute;left:50%;top:50%;width:2px;height:13px;background:var(--phase);transform-origin:top center;border-radius:2px}
@@ -169,15 +169,15 @@ footer a{color:var(--dim)}
 <section><div class="wrap">
   <h2>Hold · measure</h2>
   <p class="lede">Hold the whole union un-collapsed: every fold an equal amplitude, propagated through a Konomi mesh of κ-couplers and golden phases. Phases stay live, power is conserved, nothing has fired — until a measurement collapses it. <em>Simulated superposition, labelled so.</em></p>
-  <div class="dreambox">
+  <div class="holdbox">
     <div class="bar">
       <label class="kv" for="depth">depth</label><input type="number" id="depth" value="3" min="1" max="8" style="width:70px" aria-label="mesh depth">
-      <button id="dreambtn">hold</button>
-      <input type="number" id="wakeseed" value="42" min="0" style="width:90px" aria-label="measure seed">
-      <button id="wakebtn" class="ghost">measure</button>
+      <button id="holdbtn">hold</button>
+      <input type="number" id="measureseed" value="42" min="0" style="width:90px" aria-label="measure seed">
+      <button id="measurebtn" class="ghost">measure</button>
     </div>
     <div class="phases" id="phases"></div>
-    <div class="kv" id="dreamout">nothing held — press hold to load the superposition.</div>
+    <div class="kv" id="holdout">nothing held — press hold to load the superposition.</div>
   </div>
 </div></section>
 
@@ -533,7 +533,7 @@ return { KAPPA, DOORS, intentOf, collapse, persist, foldBack, recallOf };
 })();
 const MESH = (() => {
 const { collapse, intentOf } = RENDER;
-const { goldenPhases, minGap, konomiMesh, propagate, power, measure } = PHOTON;
+const { goldenPhases, minGap, konomiMesh, propagate, power, measure: bornMeasure } = PHOTON;
 /*__MESH_START__*/
 // mesh-mind · mesh.mjs — THE COLLECTIVE COLLAPSE LAW.
 //
@@ -553,7 +553,7 @@ const { goldenPhases, minGap, konomiMesh, propagate, power, measure } = PHOTON;
 //                      door is never auto-collapsed, and never even lit as a spectrum.
 //
 // CLAIMS AND LIMITS, kept in code: the VERDICT is the deterministic seam law over the union
-// (token interference at κ — check-the-estate-first as law). The photonic renderEvent/dream
+// (token interference at κ — check-the-estate-first as law). The photonic renderEvent/hold
 // are the SOFTWARE TWIN of that collapse — real complex arithmetic modelling interference
 // and Born measurement, exact and gated, but SIMULATED light, and labelled so on every
 // event. The claims below are only what the tests hold — nothing more is asserted.
@@ -664,7 +664,7 @@ function renderEvent(verdict, seed) {
   const state = lit.map((s) => [Math.sqrt(s.support), 0]);
   const p = power(state);
   if (!p.ok) return p;
-  const m = measure(state, seed);
+  const m = bornMeasure(state, seed);
   if (!m.ok) return m;
   const distribution = lit.map((s, i) => ({ name: s.name, node: s.node, p: round3((state[i][0] * state[i][0]) / p.power) }));
   return { ok: true, fold: { name: lit[m.mode].name, node: lit[m.mode].node }, probability: round3(m.probability), distribution, seed,
@@ -672,16 +672,16 @@ function renderEvent(verdict, seed) {
 }
 
 /**
- * DREAM — hold the un-collapsed union: every fold an equal amplitude, propagated through a
+ * HOLD — the un-collapsed union: every fold an equal amplitude, propagated through a
  * Konomi mesh (κ-couplers, golden phases) WITHOUT measuring. Phases stay live, power is
  * conserved, nothing has collapsed — a held superposition. Deterministic: no randomness
- * enters until wake. SIMULATED superposition, labelled so.
+ * enters until measure(). SIMULATED superposition, labelled so.
  */
-function dream(shards, depth) {
+function hold(shards, depth) {
   const u = union(shards);
   if (!u.ok) return u;
   const n = u.folds.length;
-  if (n < 2) return { ok: false, why: 'a shadow of one fold cannot interfere — the dream needs at least two' };
+  if (n < 2) return { ok: false, why: 'a shadow of one fold cannot interfere — a held state needs at least two' };
   const mesh = konomiMesh(n, depth);
   if (!mesh.ok) return mesh;
   const amp = Math.sqrt(1 / n);
@@ -693,18 +693,18 @@ function dream(shards, depth) {
     twin: 'simulated superposition — held, un-collapsed, phases live; exact arithmetic, not hardware' };
 }
 
-/** WAKE — the held state collapses: one seeded Born measurement over it. */
-function wake(held, seed) {
+/** MEASURE — the held state collapses: one seeded Born measurement over it. */
+function measure(held, seed) {
   const h = held && held.held ? held.held : held;
   if (!h || !Array.isArray(h.state) || !Array.isArray(h.folds) || h.state.length !== h.folds.length)
-    return { ok: false, why: 'wake needs a held dream — state and folds, one amplitude per fold' };
-  const m = measure(h.state, seed);
+    return { ok: false, why: 'measure needs a held state — state and folds, one amplitude per fold' };
+  const m = bornMeasure(h.state, seed);
   if (!m.ok) return m;
   return { ok: true, fold: { name: h.folds[m.mode].name, node: h.folds[m.mode].node }, probability: round3(m.probability), seed };
 }
 
 /*__MESH_END__*/
-return { KAPPA, shard, union, nodePhases, collectiveCollapse, renderEvent, dream, wake };
+return { KAPPA, shard, union, nodePhases, collectiveCollapse, renderEvent, hold, measure };
 })();
 /*__SHARDS_START__*/
 const SHARDS = [
@@ -803,7 +803,7 @@ const SHARDS = [
 
 const $ = (id) => document.getElementById(id);
 const on = new Set(SHARDS.map((s) => s.node));
-let lastVerdict = null, lastDream = null;
+let lastVerdict = null, lastHold = null;
 
 const enabled = () => SHARDS.filter((s) => on.has(s.node));
 
@@ -911,7 +911,7 @@ function drawFlash(r, seed) {
   $('reroll').addEventListener('click', () => drawFlash(r, Math.floor(Math.random() * 100000)));
 }
 
-function drawDreamPhases(state, wokeIdx) {
+function drawHeldPhases(state, wokeIdx) {
   $('phases').innerHTML = state.map(([re, im], i) => {
     const mag = Math.sqrt(re * re + im * im);
     const ang = Math.atan2(im, re);
@@ -919,31 +919,31 @@ function drawDreamPhases(state, wokeIdx) {
   }).join('');
 }
 
-function runDream() {
+function runHold() {
   const depth = Math.floor(Number($('depth').value));
-  const d = MESH.dream(enabled(), depth);
-  lastDream = d;
-  if (!d.ok) { $('dreamout').innerHTML = d.why; $('phases').innerHTML = ''; return; }
-  drawDreamPhases(d.held.state, -1);
-  $('dreamout').innerHTML = 'holding <b>' + d.held.folds.length + '</b> folds un-collapsed at depth ' + d.held.depth
+  const d = MESH.hold(enabled(), depth);
+  lastHold = d;
+  if (!d.ok) { $('holdout').innerHTML = d.why; $('phases').innerHTML = ''; return; }
+  drawHeldPhases(d.held.state, -1);
+  $('holdout').innerHTML = 'holding <b>' + d.held.folds.length + '</b> folds un-collapsed at depth ' + d.held.depth
     + ' · power <b>' + d.power + '</b> (conserved — no photon lost, none invented) · phases live · ' + d.twin;
 }
 
-function runWake() {
-  if (!lastDream || !lastDream.ok) { $('dreamout').textContent = 'nothing held — hold first.'; return; }
-  const seed = Math.floor(Number($('wakeseed').value));
-  const w = MESH.wake(lastDream, seed);
-  if (!w.ok) { $('dreamout').textContent = w.why; return; }
-  const idx = lastDream.held.folds.findIndex((f) => f.name === w.fold.name && f.node === w.fold.node);
-  drawDreamPhases(lastDream.held.state, idx);
-  $('dreamout').innerHTML = 'measured: <b>' + w.fold.node + '/' + w.fold.name + '</b> collapsed at p=' + w.probability.toFixed(3)
+function runMeasure() {
+  if (!lastHold || !lastHold.ok) { $('holdout').textContent = 'nothing held — hold first.'; return; }
+  const seed = Math.floor(Number($('measureseed').value));
+  const w = MESH.measure(lastHold, seed);
+  if (!w.ok) { $('holdout').textContent = w.why; return; }
+  const idx = lastHold.held.folds.findIndex((f) => f.name === w.fold.name && f.node === w.fold.node);
+  drawHeldPhases(lastHold.held.state, idx);
+  $('holdout').innerHTML = 'measured: <b>' + w.fold.node + '/' + w.fold.name + '</b> collapsed at p=' + w.probability.toFixed(3)
     + ' (seed ' + w.seed + ', reproducible) — the collapse lands where the interference concentrated.';
 }
 
 $('go').addEventListener('click', runCollapse);
 $('intent').addEventListener('keydown', (e) => { if (e.key === 'Enter') runCollapse(); });
-$('dreambtn').addEventListener('click', runDream);
-$('wakebtn').addEventListener('click', runWake);
+$('holdbtn').addEventListener('click', runHold);
+$('measurebtn').addEventListener('click', runMeasure);
 drawNodes();
 drawChips();
 </script>

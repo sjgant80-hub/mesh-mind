@@ -26,7 +26,7 @@ estate — nothing here reinvents them, the only new law is the collective colla
 - **φ-IDENTITY** — nodes take golden-angle phases; no two collide, at any count.
 - **DOORS EVERYWHERE** — money/legal/irreversible/external/private hold at the mesh level:
   never auto-collapsed, never even lit as a spectrum.
-- **THE TWIN** — `renderEvent` / `dream` / `wake` model the collapse as light (Born rule,
+- **THE TWIN** — `renderEvent` / `hold` / `measure` model the collapse as light (Born rule,
   κ-couplers, live phases): the distribution equals the support shares exactly, power is
   conserved through every held state, and every event is stamped `simulated light`.
 

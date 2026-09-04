@@ -153,17 +153,17 @@ test('SPECTRUM tie-break — equal support sorts by node THEN name, even when th
     'node outranks name — provenance is the first identity');
 });
 
-test('DREAM at the minimum — exactly two folds interfere; WAKE takes the held state directly', () => {
+test('HOLD at the minimum — exactly two folds interfere; MEASURE takes the held state directly', () => {
   const two = [{ node: 'x', folds: [F('one', 'alpha bravo'), F('two', 'charlie delta')] }];
-  const d = K.dream(two, 2);
+  const d = K.hold(two, 2);
   assert.ok(d.ok, 'two folds ARE enough to interfere — the boundary is exact');
   assert.equal(d.power, 1);
-  const viaWrapper = K.wake(d, 11);
-  const viaHeld = K.wake(d.held, 11);
-  assert.deepEqual(viaHeld, viaWrapper, 'wake accepts the wrapper or the held state itself — same collapse');
-  assert.equal(K.wake(null, 1).ok, false, 'garbage is refused, never thrown');
-  assert.match(K.wake(null, 1).why, /needs a held dream/);
-  assert.equal(K.wake(undefined, 1).ok, false);
+  const viaWrapper = K.measure(d, 11);
+  const viaHeld = K.measure(d.held, 11);
+  assert.deepEqual(viaHeld, viaWrapper, 'measure accepts the wrapper or the held state itself — same collapse');
+  assert.equal(K.measure(null, 1).ok, false, 'garbage is refused, never thrown');
+  assert.match(K.measure(null, 1).why, /needs a held state/);
+  assert.equal(K.measure(undefined, 1).ok, false);
 });
 
 test('RECOMBINE across nodes — two holders named, coverage at law', () => {
@@ -177,26 +177,26 @@ test('RECOMBINE across nodes — two holders named, coverage at law', () => {
   assert.deepEqual(r.holder, ['north', 'south'], 'a composition can span sovereign nodes — that is the mesh');
 });
 
-test('DREAM — held, un-collapsed, power conserved, deterministic; WAKE collapses it', () => {
+test('HOLD — un-collapsed, power conserved, deterministic; MEASURE collapses it', () => {
   const shards = [
     { node: 'gary', folds: [F('nexus', 'typed graph renders'), F('dreamer', 'tiered memory')] },
     { node: 'didy', folds: [F('seam', 'collapse intent'), F('bell', 'verdict rings')] },
   ];
-  const d = K.dream(shards, 3);
+  const d = K.hold(shards, 3);
   assert.ok(d.ok);
   assert.equal(d.power, 1, 'no photon lost, none invented — conservation through the whole mesh');
   assert.deepEqual(d.held.folds.map((f) => f.node + '/' + f.name), ['didy/bell', 'didy/seam', 'gary/dreamer', 'gary/nexus']);
-  assert.ok(Math.abs(d.held.state[0][0] - 0.1933731309829073) < 1e-12, 'pinned: the dream is deterministic arithmetic, not a mood');
+  assert.ok(Math.abs(d.held.state[0][0] - 0.1933731309829073) < 1e-12, 'pinned: the held state is deterministic arithmetic, not a mood');
   assert.ok(Math.abs(d.held.state[0][1] - 0.3823774811934455) < 1e-12);
   assert.ok(Math.abs(d.held.state[3][0] - 0.7820136513812382) < 1e-12);
-  assert.deepEqual(K.dream(shards, 3), d, 'no randomness enters until wake');
+  assert.deepEqual(K.hold(shards, 3), d, 'no randomness enters until measure');
   assert.ok(d.held.state.some(([re, im]) => Math.abs(im) > 1e-9), 'phases are LIVE — this is superposition, not a list of probabilities');
-  const w = K.wake(d, 42);
-  assert.deepEqual(w, { ok: true, fold: { name: 'nexus', node: 'gary' }, probability: 0.612, seed: 42 }, 'pinned wake');
-  assert.deepEqual(K.wake(d, 42), w, 'same seed, same collapse — the record of a run is not random');
-  assert.match(K.dream([{ node: 'x', folds: [F('one', 'alone')] }], 2).why, /needs at least two/);
-  assert.match(K.dream(shards, 0).why, /depth must be a positive integer/);
-  assert.match(K.wake({ state: [[1, 0]] }, 1).why, /needs a held dream/);
+  const w = K.measure(d, 42);
+  assert.deepEqual(w, { ok: true, fold: { name: 'nexus', node: 'gary' }, probability: 0.612, seed: 42 }, 'pinned measure');
+  assert.deepEqual(K.measure(d, 42), w, 'same seed, same collapse — the record of a run is not random');
+  assert.match(K.hold([{ node: 'x', folds: [F('one', 'alone')] }], 2).why, /needs at least two/);
+  assert.match(K.hold(shards, 0).why, /depth must be a positive integer/);
+  assert.match(K.measure({ state: [[1, 0]] }, 1).why, /needs a held state/);
 });
 
 test('THE FUZZ — 250 random meshes: total, deterministic, order-blind, doors never lit', () => {
